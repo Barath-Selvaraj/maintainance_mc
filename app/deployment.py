@@ -64,6 +64,20 @@ class DeploymentService:
                 check=True,
             )
 
+        else:
+
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    feature_path,
+                    "pull",
+                    "origin",
+                    "main",
+                ],
+                check=True,
+            )
+
         image_name = f"{feature_name}:latest"
 
         container_name = f"{feature_name}-container"
