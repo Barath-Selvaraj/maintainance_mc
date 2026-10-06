@@ -4,7 +4,7 @@ import tarfile
 import io
 
 import docker
-
+from app.nginx_service import NginxService
 
 class DeploymentService:
 
@@ -16,6 +16,7 @@ class DeploymentService:
 
     def __init__(self):
         self.docker_client = docker.from_env()
+        self.nginx_service = NginxService()
 
     def get_features(self):
         return list(self.FEATURE_REPOSITORIES.keys())
@@ -106,7 +107,13 @@ class DeploymentService:
             name=container_name,
             detach=True,
             network="proxy-network",
+            labels={
+                "managed-feature": "true",
+                "feature-name": feature_name,
+            },
         )
+
+        self.nginx_service.update_configuration()
 
         return {
             "status": "deployed",
