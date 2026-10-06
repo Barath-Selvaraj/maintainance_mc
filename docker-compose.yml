@@ -10,7 +10,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./workspace:/workspace
-      - ./nginx/conf.d:/shared-nginx/conf.d
+      - ./nginx/conf.d:/shared-nginx
 
     networks:
       - proxy-network
@@ -28,6 +28,7 @@ services:
 
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
 
     depends_on:
       - management

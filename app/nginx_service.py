@@ -11,7 +11,7 @@ class NginxService:
         self.nginx_container_name = "onprem-nginx"
 
         self.config_path = (
-            "/shared-nginx/conf.d/features.conf"
+            "/shared-nginx/snippets/features.conf"
         )
 
     def update_configuration(self):
