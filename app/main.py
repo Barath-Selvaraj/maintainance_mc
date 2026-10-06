@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from app.docker_manager import DockerManager
 from app.deployment import DeploymentService
+from app.schemas.deployment import FeatureSelection
 
 
 app = FastAPI(
@@ -28,6 +29,7 @@ def health():
 
 @app.get("/containers")
 def get_containers():
+
     docker_manager = DockerManager()
 
     return {
@@ -35,9 +37,37 @@ def get_containers():
     }
 
 
-@app.post("/deploy/{feature_name}")
-def deploy_feature(feature_name: str):
+@app.get("/features")
+def get_features():
 
     deployment_service = DeploymentService()
 
-    return deployment_service.clone_feature(feature_name)
+    return {
+        "features": deployment_service.get_features()
+    }
+
+
+@app.post("/deploy")
+def deploy_features(selection: FeatureSelection):
+
+    try:
+
+        deployment_service = DeploymentService()
+
+        return deployment_service.deploy_features(
+            selection.features
+        )
+
+    except ValueError as error:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )

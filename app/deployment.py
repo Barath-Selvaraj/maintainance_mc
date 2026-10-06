@@ -20,6 +20,21 @@ class DeploymentService:
     def get_features(self):
         return list(self.FEATURE_REPOSITORIES.keys())
 
+    def deploy_features(self, selected_features):
+
+        results = []
+
+        for feature_name in selected_features:
+
+            result = self.deploy_feature(feature_name)
+
+            results.append(result)
+
+        return {
+            "status": "deployment_completed",
+            "features": results
+        }
+
     def deploy_feature(self, feature_name: str):
 
         if feature_name not in self.FEATURE_REPOSITORIES:
@@ -30,6 +45,7 @@ class DeploymentService:
         repository_url = self.FEATURE_REPOSITORIES[feature_name]
 
         workspace = "/workspace"
+
         feature_path = os.path.join(
             workspace,
             feature_name
@@ -49,6 +65,7 @@ class DeploymentService:
             )
 
         image_name = f"{feature_name}:latest"
+
         container_name = f"{feature_name}-container"
 
         # Build Docker image
@@ -59,9 +76,11 @@ class DeploymentService:
 
         # Remove old container if it exists
         try:
+
             old_container = self.docker_client.containers.get(
                 container_name
             )
+
             old_container.remove(force=True)
 
         except docker.errors.NotFound:
