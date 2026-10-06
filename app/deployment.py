@@ -2,6 +2,7 @@ import os
 import subprocess
 import tarfile
 import io
+import shutil
 
 import docker
 from app.nginx_service import NginxService
@@ -174,3 +175,41 @@ class DeploymentService:
         )
 
         return image
+
+    def remove_feature(self, feature_name: str):
+
+        if feature_name not in self.FEATURE_REPOSITORIES:
+            raise ValueError(
+                f"Unknown feature: {feature_name}"
+            )
+
+        container_name = f"{feature_name}-container"
+
+        # Remove feature container
+        try:
+            container = self.docker_client.containers.get(
+                container_name
+            )
+
+            container.remove(force=True)
+
+        except docker.errors.NotFound:
+            pass
+
+        # Remove cloned source
+        feature_path = os.path.join(
+            "/workspace",
+            feature_name
+        )
+
+        if os.path.exists(feature_path):
+            import shutil
+            shutil.rmtree(feature_path)
+
+        # Regenerate Nginx configuration
+        self.nginx_service.update_configuration()
+
+        return {
+            "status": "removed",
+            "feature": feature_name
+        }

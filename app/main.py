@@ -1,15 +1,29 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 
 from app.docker_manager import DockerManager
 from app.deployment import DeploymentService
+from app.monitoring import MonitoringService
 from app.schemas.deployment import FeatureSelection
+
+
+monitoring_service = MonitoringService()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    monitoring_service.start()
+
+    yield
 
 
 app = FastAPI(
     title="On-Premise Management Service",
     version="1.0.0",
+    lifespan=lifespan,
 )
-
 
 @app.get("/")
 def root():
@@ -71,3 +85,28 @@ def deploy_features(selection: FeatureSelection):
             status_code=500,
             detail=str(error)
         )
+
+@app.delete("/features/{feature_name}")
+def remove_feature(feature_name: str):
+
+    try:
+        deployment_service = DeploymentService()
+
+        return deployment_service.remove_feature(
+            feature_name
+        )
+
+    except ValueError as error:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
+
+    except Exception as error:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(error)
+        )    
+

@@ -36,24 +36,24 @@ class NginxService:
             container_name = container.name
 
             config += f"""
-location = /{feature_name} {{
-    proxy_pass http://{container_name}:8000/;
+            location = /{feature_name} {{
+                proxy_pass http://{container_name}:8000/;
 
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}}
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }}
 
-location /{feature_name}/ {{
-    proxy_pass http://{container_name}:8000/;
+            location /{feature_name}/ {{
+                proxy_pass http://{container_name}:8000/;
 
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}}
-"""
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }}
+            """
 
         with open(self.config_path, "w") as file:
             file.write(config)
