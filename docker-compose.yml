@@ -1,0 +1,44 @@
+services:
+
+  management:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: management-service
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./workspace:/workspace
+      - ./nginx/conf.d:/shared-nginx/conf.d
+
+    networks:
+      - proxy-network
+
+    restart: unless-stopped
+
+
+  nginx:
+    image: nginx:alpine
+
+    container_name: onprem-nginx
+
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+
+    depends_on:
+      - management
+
+    networks:
+      - proxy-network
+
+    restart: unless-stopped
+
+
+networks:
+
+  proxy-network:
+    name: proxy-network
