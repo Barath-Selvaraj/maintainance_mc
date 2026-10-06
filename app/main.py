@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.docker_manager import DockerManager
+from app.deployment import DeploymentService
 
 
 app = FastAPI(
@@ -32,3 +33,11 @@ def get_containers():
     return {
         "containers": docker_manager.get_containers()
     }
+
+
+@app.post("/deploy/{feature_name}")
+def deploy_feature(feature_name: str):
+
+    deployment_service = DeploymentService()
+
+    return deployment_service.clone_feature(feature_name)
