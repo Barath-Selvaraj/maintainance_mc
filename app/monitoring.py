@@ -1,5 +1,6 @@
 import time
 import threading
+from datetime import datetime
 
 import docker
 
@@ -19,6 +20,8 @@ class MonitoringService:
 
         self.latest_status = []
 
+        self.last_checked_at = None
+
         self.running = False
 
     def check_containers(self):
@@ -33,9 +36,7 @@ class MonitoringService:
 
             container.reload()
 
-            restart_count = container.attrs[
-                "RestartCount"
-            ]
+            restart_count = container.attrs["RestartCount"]
 
             status = container.status
 
@@ -51,16 +52,23 @@ class MonitoringService:
                 restart_count
             )
 
-            new_restarts = restart_count - previous_count
+            if restart_count > previous_count:
+
+                new_restarts = restart_count - previous_count
+
+                print(
+                    f"[MONITOR] {container.name} "
+                    f"restarted {new_restarts} time(s)"
+                )
 
             if (
                 restart_count >= self.RESTART_THRESHOLD
                 and container.name not in self.alerted_containers
             ):
 
-                self.send_restart_alert(
-                    container.name,
-                    restart_count
+                print(
+                    f"[ALERT] {container.name} "
+                    f"has restarted {restart_count} times"
                 )
 
                 self.alerted_containers.add(
@@ -73,20 +81,17 @@ class MonitoringService:
 
         self.latest_status = current_status
 
-    def send_restart_alert(
-        self,
-        container_name,
-        restart_count
-    ):
+        self.last_checked_at = datetime.now().isoformat()
 
         print(
-            f"ALERT: {container_name} "
-            f"has restarted {restart_count} times"
+            f"[MONITOR] Checked {len(containers)} "
+            f"container(s) at {self.last_checked_at}"
         )
 
     def get_status(self):
 
         return {
+            "checked_at": self.last_checked_at,
             "containers": self.latest_status
         }
 
@@ -115,7 +120,7 @@ class MonitoringService:
             except Exception as error:
 
                 print(
-                    f"Monitoring error: {error}"
+                    f"[MONITOR ERROR] {error}"
                 )
 
             time.sleep(

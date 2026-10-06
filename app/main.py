@@ -109,4 +109,7 @@ def remove_feature(feature_name: str):
             status_code=500,
             detail=str(error)
         )    
+@app.get("/monitoring/status")
+def monitoring_status():
 
+    return monitoring_service.get_status()
