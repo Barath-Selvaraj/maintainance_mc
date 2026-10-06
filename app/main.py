@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 
+from app.docker_manager import DockerManager
+
+
 app = FastAPI(
     title="On-Premise Management Service",
     version="1.0.0",
@@ -19,4 +22,13 @@ def root():
 def health():
     return {
         "status": "healthy"
+    }
+
+
+@app.get("/containers")
+def get_containers():
+    docker_manager = DockerManager()
+
+    return {
+        "containers": docker_manager.get_containers()
     }
