@@ -3,7 +3,7 @@ import threading
 from datetime import datetime
 
 import docker
-
+from app.email import EmailService
 
 class MonitoringService:
 
@@ -13,6 +13,8 @@ class MonitoringService:
     def __init__(self):
 
         self.docker_client = docker.from_env()
+
+        self.email_service = EmailService()
 
         self.previous_restart_counts = {}
 
@@ -68,7 +70,13 @@ class MonitoringService:
 
                 print(
                     f"[ALERT] {container.name} "
-                    f"has restarted {restart_count} times"
+                    f"has restarted {restart_count} times",
+                    flush=True
+                )
+
+                self.email_service.send_restart_alert(
+                    container_name=container.name,
+                    restart_count=restart_count
                 )
 
                 self.alerted_containers.add(
