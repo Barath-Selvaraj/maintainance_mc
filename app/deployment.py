@@ -108,6 +108,7 @@ class DeploymentService:
             name=container_name,
             detach=True,
             network="proxy-network",
+            restart_policy={"Name": "unless-stopped"},
             labels={
                 "managed-feature": "true",
                 "feature-name": feature_name,
