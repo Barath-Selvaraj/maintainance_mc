@@ -32,6 +32,8 @@ class EmailService:
             "DEVELOPER_EMAIL"
         )
 
+        self.from_email = os.getenv("FROM_EMAIL")
+
     def send_restart_alert(
         self,
         container_name: str,
@@ -56,7 +58,7 @@ class EmailService:
             f"restarted {restart_count} times"
         )
 
-        message["From"] = self.smtp_username
+        message["From"] = self.from_email
 
         message["To"] = self.developer_email
 
